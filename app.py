@@ -7,5 +7,9 @@ app = Flask(__name__))
 def main_app():
     return main.generate()
 
+@app.route('/ok')
+def health():
+    return "ok"
+
 if __name__ == '__main__':
     app.run()
