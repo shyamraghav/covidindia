@@ -2,7 +2,7 @@ import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import mapclassify
-import cStringIO
+import io
 import base64
 
 """Fetchind Data from sources"""
@@ -63,10 +63,16 @@ def generate_results():
         def generate_base64():
 
             for every_map in maps:
-                my_stringIObytes = cStringIO.StringIO()
-                every_map.savefig(my_stringIObytes, format='jpg')
-                my_stringIObytes.seek(0)
-                map_to_base64 = base64.b64encode(my_stringIObytes.read())
+                # my_stringIObytes = cStringIO.StringIO()
+                # every_map.savefig(my_stringIObytes, format='jpg')
+                # my_stringIObytes.seek(0)
+                # map_to_base64 = base64.b64encode(my_stringIObytes.read())
+
+                pic_IObytes = io.BytesIO()
+                plt.savefig(pic_IObytes, format='png')
+                pic_IObytes.seek(0)
+                map_to_base64 = base64.b64encode(pic_IObytes.read())
+
                 yield map_to_base64
 
         base64_maps = generate_base64()
