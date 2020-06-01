@@ -9,9 +9,9 @@ def main_app():
 
 @app.route('/about')
 def about():
-    return "This is a python REST application created for educational purpose. Data are fetched from international " \
-           "credible sources inferences and findinds are purely experiments. Not for research purpose. Please contact " \ 
-           "shyamramanan@gmail.com "
+    return """This is a python REST application created for educational purpose. Data are fetched from international \n
+           credible sources inferences and findings are purely experiments. Not for research purpose. Please contact \n 
+           shyamramanan@gmail.com """
 
 @app.route('/ok')
 def health():
