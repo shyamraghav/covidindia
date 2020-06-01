@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def main_app():
-    return main.generate()
+    return main.generate_heatmap()
 
 @app.route('/ok')
 def health():

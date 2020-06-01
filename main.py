@@ -1,75 +1,66 @@
-import geopandas as gpd
 import pandas as pd
-import numpy as np
-import mapclassify
+import geopandas as gpd
 import matplotlib.pyplot as plt
-import base64
+import mapclassify
 
-# Plotter Making and preprocessing using Geopandas
-
-shape_file = 'India_Districts_ADM2_GADM.shp'
-
-plotter = gpd.read_file(shape_file)[['STATE', 'geometry']]
+"""Fetchind Data from sources"""
 
 
-def title(state):
-    return state.title()
+def fetch_data():
+    response = pd.read_html("https://www.mohfw.gov.in/")
+    in_data = response[0]
+    in_data = in_data.iloc[:35, :]
+    in_data.columns = ['Sno', 'state', 'active', 'cured', 'death', 'confirmed']
+    for col in ['active', 'cured', 'death', 'confirmed']:
+        in_data[col] = in_data[col].astype(int)
+    in_data['death%'] = (in_data['death'] / in_data['confirmed']) * 100
+    in_data['cure%'] = (in_data['cured'] / in_data['confirmed']) * 100
+    in_data['state'] = in_data['state'].map(lambda x: x.lower())
+
+    in_data.replace("chhattisgarh", "bihar", inplace=True)
+    in_data.replace("jharkhand", 'bihar', inplace=True)
+    in_data.replace("dadar nagar haveli", 'dadar and nagar haveli', inplace=True)
+    in_data.replace("odisha", 'orissa', inplace=True)
+    in_data.replace("ladakh", 'jammu and kashmir', inplace=True)
+    in_data.replace("telengana", 'andhra pradesh', inplace=True)
+    in_data.replace("uttarakhand", 'uttar pradesh', inplace=True)
+
+    state_data = in_data.groupby(by='state').sum()
+
+    return state_data
 
 
-plotter['STATE'] = plotter['STATE'].apply(title)
-
-wrong = ['Andaman And Nicobar Islands', 'Dadra Nagar Haveli',
-         'Daman And Diu',
-         'Jammu And Kashmir',
-         'Odissa',
-         'Pondicherry']
-
-right = ['Andaman and Nicobar Islands',
-         'Dadra and Nagar Haveli',
-         'Daman and Diu',
-         'Jammu and Kashmir',
-         'Odisha',
-         'Puducherry']
-
-for n in range(len(wrong)):
-    plotter['STATE'].replace(wrong[n], right[n], inplace=True)
+"""Importing the Graph Data"""
 
 
-# Requesting the content from the Ministry of Health and Family Welfare
-def pull_data():
-    dfs = pd.read_html('https://www.mohfw.gov.in/')
-    live_data = dfs[0]
-    live_data = live_data.iloc[:35, :]
-    for col in ['Active Cases*', 'Cured/Discharged/Migrated*', 'Deaths**', 'Total Confirmed cases*']:
-        live_data[col] = live_data[col].astype(int)
-    live_data['Death%'] = (live_data['Deaths**'] / live_data['Total Confirmed cases*']) * 100
-    live_data['Cured%'] = (live_data['Cured/Discharged/Migrated*'] / live_data['Total Confirmed cases*']) * 100
+def fetch_map():
+    graph_data = gpd.read_file('india_ds.shp')
+    graph_data['STATE'] = graph_data['STATE'].map(lambda x: x.lower())
 
-    # Merging the two findings and plotting
+    graph_data.replace("pondicherry", 'puducherry', inplace=True)
 
-    merge_data = plotter.merge(live_data, right_on='Name of State / UT', left_on='State_Name', how='inner')
-
-    plot_data = gpd.GeoDataFrame(merge_data)
-    return plot_data
+    return graph_data
 
 
-# plotting the data and convert to Base64
-
-def map_plotter(data, param):
-    data.plot(column=param, figsize=(20, 10), legend=True, edgecolor='green', cmap='OrRd', scheme='quantiles')
-    plt.savefig('map_image.jpg')
-    with open("map_image.jpg", "rb") as img_file:
-        encoded_string = base64.b64encode(img_file.read())
-    return encoded_string
+"""Creaeting Merged Dataframe"""
 
 
-def generate():
-    plot_data = pull_data()
-    maps = {"confirmed": map_plotter(plot_data, "Total Confirmed cases*"),
-            # "active": map_plotter(plot_data, "Active Cases*"),
-            # "cures": map_plotter(plot_data, "Cured/Discharged/Migrated*"),
-            # "death": map_plotter(plot_data, "Deaths**"),
-            # "cure%": map_plotter(plot_data, "Cured%"),
-            # "death%": map_plotter(plot_data, "Death%")}
+def generate_heatmap():
+    state_details = fetch_data()
+    graph_details = fetch_map()
 
-    return maps
+    my_map = graph_details.merge(state_details, right_on='state', left_on='STATE')
+
+    confirmed = my_map.plot(column='confirmed', figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd', scheme='quantiles')
+    death = my_map.plot(column='death', figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd', scheme='quantiles')
+    cured = my_map.plot(column='cured', figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd', scheme='quantiles')
+    active = my_map.plot(column='active', figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd', scheme='quantiles')
+    death_percent = my_map.plot(column='death%', figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd', scheme='quantiles')
+    cured_percent = my_map.plot(column='cured%', figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd', scheme='quantiles')
+
+    return {"confirmed":confirmed,
+            "death": death,
+            "cured": cured,
+            "active": active,
+            "death_percent": death_percent,
+            "cured_percent": cured_percent}
