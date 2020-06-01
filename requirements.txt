@@ -17,3 +17,5 @@ wrapt==1.12.1
 geopandas==0.7.0
 gunicorn==20.0.4
 Flask==1.1.0
+cStringIO
+base64
