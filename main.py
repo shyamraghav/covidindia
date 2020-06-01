@@ -2,6 +2,8 @@ import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import mapclassify
+import cStringIO
+import base64
 
 """Fetchind Data from sources"""
 
@@ -45,22 +47,36 @@ def fetch_map():
 """Creaeting Merged Dataframe"""
 
 
-def generate_heatmap():
+def generate_results():
     state_details = fetch_data()
     graph_details = fetch_map()
 
     my_map = graph_details.merge(state_details, right_on='state', left_on='STATE')
+    try:
+        def generate_heatmap():
+            for column_name in ["confirmed", 'death', 'cured', 'active', 'death%', 'cured%']:
+                yield my_map.plot(column=column_name, figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd',
+                                  scheme='quantiles')
 
-    confirmed = my_map.plot(column='confirmed', figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd', scheme='quantiles')
-    death = my_map.plot(column='death', figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd', scheme='quantiles')
-    cured = my_map.plot(column='cured', figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd', scheme='quantiles')
-    active = my_map.plot(column='active', figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd', scheme='quantiles')
-    death_percent = my_map.plot(column='death%', figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd', scheme='quantiles')
-    cured_percent = my_map.plot(column='cured%', figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd', scheme='quantiles')
+        maps = generate_heatmap()
 
-    return {"confirmed":confirmed,
-            "death": death,
-            "cured": cured,
-            "active": active,
-            "death_percent": death_percent,
-            "cured_percent": cured_percent}
+        def generate_base64():
+
+            for every_map in maps:
+                my_stringIObytes = cStringIO.StringIO()
+                every_map.savefig(my_stringIObytes, format='jpg')
+                my_stringIObytes.seek(0)
+                map_to_base64 = base64.b64encode(my_stringIObytes.read())
+                yield map_to_base64
+
+        base64_maps = generate_base64()
+
+        return {"confirmed": next(base64_maps),
+                "death": next(base64_maps),
+                "cured": next(base64_maps),
+                "active": next(base64_maps),
+                "death_percent": next(base64_maps),
+                "cured_percent": next(base64_maps)}
+
+    except Exception as e:
+        return str(e)
