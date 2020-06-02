@@ -1,9 +1,9 @@
 import pandas as pd
-import geopandas as gpd
+# import geopandas as gpd
 import matplotlib.pyplot as plt
 import mapclassify
 # import io
-import base64
+# import base64
 import requests
 import json
 
@@ -17,7 +17,7 @@ def fetch_data():
     state_data = response_data[['state', 'active', 'confirmed', 'deaths', 'recovered']]
     state_data['state'] = state_data['state'].map(lambda x: x.lower())
 
-    state_data['death%'] = (state_data['death'] / state_data['confirmed']) * 100
+    state_data['death%'] = (state_data['deaths'] / state_data['confirmed']) * 100
     state_data['cure%'] = (state_data['recovered'] / state_data['confirmed']) * 100
 
     state_data.replace('telangana', 'andhra pradesh', inplace=True)
