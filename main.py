@@ -2,32 +2,31 @@ import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import mapclassify
-import io
+# import io
 import base64
+import requests
+import json
 
 """Fetchind Data from sources"""
 
 
 def fetch_data():
-    response = pd.read_html("https://www.mohfw.gov.in/")
-    in_data = response[0]
-    in_data = in_data.iloc[:35, :]
-    in_data.columns = ['Sno', 'state', 'active', 'cured', 'death', 'confirmed']
-    for col in ['active', 'cured', 'death', 'confirmed']:
-        in_data[col] = in_data[col].astype(int)
-    in_data['death%'] = (in_data['death'] / in_data['confirmed']) * 100
-    in_data['cure%'] = (in_data['cured'] / in_data['confirmed']) * 100
-    in_data['state'] = in_data['state'].map(lambda x: x.lower())
+    response = requests.get("https://api.covid19india.org/data.json")
+    data = dict(json.loads(response.text))
+    response_data = pd.DataFrame(data['statewise'])
+    state_data = response_data[['state', 'active', 'confirmed', 'deaths', 'recovered']]
+    state_data['state'] = state_data['state'].map(lambda x: x.lower())
 
-    in_data.replace("chhattisgarh", "bihar", inplace=True)
-    in_data.replace("jharkhand", 'bihar', inplace=True)
-    in_data.replace("dadar nagar haveli", 'dadar and nagar haveli', inplace=True)
-    in_data.replace("odisha", 'orissa', inplace=True)
-    in_data.replace("ladakh", 'jammu and kashmir', inplace=True)
-    in_data.replace("telengana", 'andhra pradesh', inplace=True)
-    in_data.replace("uttarakhand", 'uttar pradesh', inplace=True)
+    state_data['death%'] = (state_data['death'] / state_data['confirmed']) * 100
+    state_data['cure%'] = (state_data['recovered'] / state_data['confirmed']) * 100
 
-    state_data = in_data.groupby(by='state').sum()
+    state_data.replace('telangana', 'andhra pradesh', inplace=True)
+    state_data.replace('jharkhand', 'bihar', inplace=True)
+    state_data.replace('chhattisgarh', 'madhya pradesh', inplace=True)
+    state_data.replace('uttarakhand', 'uttar pradesh', inplace=True)
+    state_data.replace('odisha', 'orissa', inplace=True)
+    state_data.replace('puducherry', 'pondicherry', inplace=True)
+    state_data.replace('ladakh', 'jammu and kashmir', inplace=True)
 
     return state_data
 
@@ -36,10 +35,11 @@ def fetch_data():
 
 
 def fetch_map():
-    graph_data = gpd.read_file('india_ds.shp')
+    graph_data = gpd.read_file('graph_data//india_ds.shp')
     graph_data['STATE'] = graph_data['STATE'].map(lambda x: x.lower())
 
-    graph_data.replace("pondicherry", 'puducherry', inplace=True)
+    graph_data['STATE'].replace('dadra and nagar haveli', "dadra and nagar haveli and daman and diu", inplace=True)
+    graph_data['STATE'].replace('daman and diu', "dadra and nagar haveli and daman and diu", inplace=True)
 
     return graph_data
 
