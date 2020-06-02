@@ -2,8 +2,8 @@ import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import mapclassify
-# import io
-# import base64
+import io
+import base64
 import requests
 import json
 
