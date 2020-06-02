@@ -17,6 +17,9 @@ def fetch_data():
     state_data = response_data[['state', 'active', 'confirmed', 'deaths', 'recovered']]
     state_data['state'] = state_data['state'].map(lambda x: x.lower())
 
+    for col in ['active', 'confirmed', 'deaths', 'recovered']:
+        state_data[col] = state_data[col].astype(int)
+
     state_data['death%'] = (state_data['deaths'] / state_data['confirmed']) * 100
     state_data['cure%'] = (state_data['recovered'] / state_data['confirmed']) * 100
 
