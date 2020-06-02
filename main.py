@@ -80,7 +80,7 @@ def generate_results():
 
         base64_maps = generate_base64()
 
-        return {"confirmed": type(next(base64_maps))}
+        return {"confirmed": str(type(next(base64_maps)))}
                 # "death": next(base64_maps),
                 # "cured": next(base64_maps),
                 # "active": next(base64_maps),
