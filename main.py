@@ -80,12 +80,12 @@ def generate_results():
 
         base64_maps = generate_base64()
 
-        return {"confirmed": str(type(next(base64_maps)))}
-                # "death": next(base64_maps),
-                # "cured": next(base64_maps),
-                # "active": next(base64_maps),
-                # "death_percent": next(base64_maps),
-                # "cured_percent": next(base64_maps)}
+        return {"confirmed": str(type(next(base64_maps))),
+                "death": str(next(base64_maps)),
+                "cured": str(next(base64_maps)),
+                "active": str(next(base64_maps)),
+                "death_percent": str(next(base64_maps)),
+                "cured_percent": str(next(base64_maps))}
 
     except Exception as e:
         return str(e)
