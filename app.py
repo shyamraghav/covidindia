@@ -14,7 +14,7 @@ def main_app():
 @app.route('/maps/<map_type>')
 def get_maps(map_type):
     if request.args.get('type') == '1':
-        filename = map_type + '.jpg'
+        filename = 'india.jpg'
     else:
         filename = 'error.gif'
     return send_file(filename, mimetype='image/jpg')
