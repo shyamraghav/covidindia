@@ -7,7 +7,12 @@ app = Flask(__name__)
 
 @app.route('/')
 def main_app():
-    return main.try_generate()
+    # return main.try_generate()
+    bytes_obj = main.try_generate()
+
+    return send_file(bytes_obj,
+                     attachment_filename='plot.png',
+                     mimetype='image/png')
 
 
 # @app.route('/maps/<map_type>')

@@ -108,7 +108,7 @@ def try_generate():
         plt.savefig(pic_IO_bytes, format='png')
         pic_IO_bytes.seek(0)
 
-        return str(pic_IO_bytes)
+        return pic_IO_bytes
 
     except Exception as e:
         return str(e)
