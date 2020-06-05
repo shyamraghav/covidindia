@@ -57,7 +57,8 @@ def generate_results():
     my_map = graph_details.merge(state_details, right_on='state', left_on='STATE')
     try:
         def generate_heatmap():
-            for column_name in ["confirmed", 'death', 'cured', 'active', 'death%', 'cured%']:
+            for column_name in ["confirmed"]:
+                # , 'death', 'cured', 'active', 'death%', 'cured%'
                 yield my_map.plot(column=column_name, figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd',
                                   scheme='quantiles')
 
@@ -74,18 +75,18 @@ def generate_results():
                 pic_IObytes = io.BytesIO()
                 plt.savefig(pic_IObytes, format='png')
                 pic_IObytes.seek(0)
-                map_to_base64 = base64.b64encode(pic_IObytes.read())
+                # map_to_base64 = base64.b64encode(pic_IObytes.read())
 
-                yield map_to_base64
+                yield pic_IObytes
 
         base64_maps = generate_base64()
 
-        return {"confirmed": next(base64_maps),
-                "death": next(base64_maps),
-                "cured": next(base64_maps),
-                "active": next(base64_maps),
-                "death_percent": next(base64_maps),
-                "cured_percent": next(base64_maps)}
+        return {"confirmed": next(base64_maps)}
+                # "death": next(base64_maps),
+                # "cured": next(base64_maps),
+                # "active": next(base64_maps),
+                # "death_percent": next(base64_maps),
+                # "cured_percent": next(base64_maps)}
 
     except Exception as e:
         return str(e)

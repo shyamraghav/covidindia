@@ -1,5 +1,5 @@
 from flask import Flask, send_file, request
-import main
+from main import generate_results
 
 
 
@@ -13,11 +13,11 @@ def main_app():
 
 @app.route('/maps/<map_type>')
 def get_maps(map_type):
-    if request.args.get('type') == '1':
-        filename = 'india.jpg'
-    else:
-        filename = 'error.gif'
-    return send_file(filename, mimetype='image/jpg')
+    bytes_obj = generate_results()
+
+    return send_file(bytes_obj,
+                     attachment_filename='plot.png',
+                     mimetype='image/png')
 
 
 @app.route('/about')
