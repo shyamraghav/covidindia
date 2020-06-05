@@ -1,23 +1,22 @@
 from flask import Flask, send_file, request
-from main import generate_results
-
-
+# from main import generate_results
+import main
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def main_app():
-    return main.generate_results()
+    return main.try_generate()
 
 
-@app.route('/maps/<map_type>')
-def get_maps(map_type):
-    bytes_obj = generate_results()
-
-    return send_file(bytes_obj,
-                     attachment_filename='plot.png',
-                     mimetype='image/png')
+# @app.route('/maps/<map_type>')
+# def get_maps(map_type):
+#     bytes_obj = generate_results()
+#
+#     return send_file(bytes_obj,
+#                      attachment_filename='plot.png',
+#                      mimetype='image/png')
 
 
 @app.route('/about')

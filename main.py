@@ -77,7 +77,7 @@ def generate_results():
                 pic_IObytes.seek(0)
                 # map_to_base64 = base64.b64encode(pic_IObytes.read())
 
-                yield pic_IObytes
+                return pic_IObytes
 
         base64_maps = generate_base64()
 
@@ -89,6 +89,26 @@ def generate_results():
         #         # "active": next(base64_maps),
         #         # "death_percent": next(base64_maps),
         #         # "cured_percent": next(base64_maps)}
+
+    except Exception as e:
+        return str(e)
+
+
+def try_generate():
+    state_details = fetch_data()
+    graph_details = fetch_map()
+
+    my_map = graph_details.merge(state_details, right_on='state', left_on='STATE')
+
+    try:
+
+        my_map.plot(column="confirmed", figsize=(20, 10), legend=True, edgecolor='black', cmap='OrRd',
+                    scheme='quantiles')
+        pic_IO_bytes = io.BytesIO()
+        plt.savefig(pic_IO_bytes, format='png')
+        pic_IO_bytes.seek(0)
+
+        return pic_IO_bytes
 
     except Exception as e:
         return str(e)
